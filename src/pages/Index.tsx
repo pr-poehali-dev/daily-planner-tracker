@@ -23,10 +23,42 @@ const Index = () => {
   ]);
 
   const [trackers, setTrackers] = useState([
-    { id: 1, name: 'Вода', icon: 'Droplet', current: 6, goal: 8, color: 'bg-blue-500' },
-    { id: 2, name: 'Шаги', icon: 'Footprints', current: 7500, goal: 10000, color: 'bg-green-500' },
-    { id: 3, name: 'Медитация', icon: 'Heart', current: 15, goal: 20, color: 'bg-purple-500' },
-    { id: 4, name: 'Чтение', icon: 'BookOpen', current: 25, goal: 30, color: 'bg-orange-500' },
+    { 
+      id: 1, 
+      name: 'Я победитель!', 
+      color: 'bg-blue-500',
+      days: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+    },
+    { 
+      id: 2, 
+      name: 'Утренняя зарядка', 
+      color: 'bg-purple-500',
+      days: [1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]
+    },
+    { 
+      id: 3, 
+      name: 'Пить достаточно воды', 
+      color: 'bg-cyan-500',
+      days: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]
+    },
+    { 
+      id: 4, 
+      name: 'Вовремя ложиться спать', 
+      color: 'bg-red-400',
+      days: [1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0]
+    },
+    { 
+      id: 5, 
+      name: 'Дыхательная практика', 
+      color: 'bg-teal-500',
+      days: [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]
+    },
+    { 
+      id: 6, 
+      name: 'Витамины', 
+      color: 'bg-yellow-400',
+      days: [1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1]
+    },
   ]);
 
   const getDaysInMonth = (date: Date) => {
@@ -253,43 +285,48 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="trackers" className="animate-slide-up">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {trackers.map((tracker) => {
-                const percentage = (tracker.current / tracker.goal) * 100;
-                return (
-                  <Card key={tracker.id} className="border-2 shadow-xl hover:shadow-2xl transition-shadow bg-white">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-3">
-                        <div className={`p-3 rounded-2xl ${tracker.color} bg-opacity-20`}>
-                          <Icon name={tracker.icon} className={tracker.color.replace('bg-', 'text-')} size={24} />
-                        </div>
-                        <span>{tracker.name}</span>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm font-medium">
-                          <span>{tracker.current}</span>
-                          <span className="text-muted-foreground">/ {tracker.goal}</span>
-                        </div>
-                        <Progress value={percentage} className="h-3" />
+            <Card className="border-2 shadow-xl bg-gradient-to-br from-gray-900 to-gray-800 text-white overflow-hidden">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between text-xs text-gray-400">
+                  {Array.from({ length: 21 }, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (20 - i));
+                    const day = date.getDate();
+                    const dayOfWeek = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'][date.getDay()];
+                    return (
+                      <div key={i} className="text-center flex-1">
+                        <div className="font-bold">{day}</div>
+                        <div className="uppercase text-[10px]">{dayOfWeek}</div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="flex-1 rounded-xl">
-                          <Icon name="Minus" size={16} />
-                        </Button>
-                        <Button size="sm" className={`flex-1 rounded-xl ${tracker.color} hover:opacity-90`}>
-                          <Icon name="Plus" size={16} />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-            <Button className="w-full mt-4 h-12 text-lg rounded-xl bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700">
+                    );
+                  })}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3 pb-6">
+                {trackers.map((tracker) => (
+                  <div key={tracker.id} className="flex items-center gap-3">
+                    <div className="w-48 text-sm font-medium truncate">
+                      {tracker.name}
+                    </div>
+                    <div className="flex-1 flex items-center gap-1">
+                      {tracker.days.map((completed, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex-1 aspect-square rounded-full transition-all cursor-pointer hover:scale-110 ${
+                            completed
+                              ? `${tracker.color} shadow-lg`
+                              : 'bg-gray-700 border-2 border-gray-600'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+            <Button className="w-full mt-4 h-12 text-lg rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
               <Icon name="Plus" className="mr-2" />
-              Добавить трекер
+              Добавить привычку
             </Button>
           </TabsContent>
 
