@@ -9,19 +9,16 @@ import { Badge } from '@/components/ui/badge';
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [todayTasks, setTodayTasks] = useState([
-    { id: 1, title: 'Утренняя зарядка', completed: false, category: 'Здоровье' },
-    { id: 2, title: 'Работа над проектом', completed: false, category: 'Работа' },
-    { id: 3, title: 'Прочитать 30 страниц', completed: true, category: 'Обучение' },
-    { id: 4, title: 'Позвонить клиенту', completed: false, category: 'Работа' },
-  ]);
-
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  
   const [weekTasks, setWeekTasks] = useState([
-    { id: 1, title: 'Подготовить презентацию', day: 'ПН', completed: false },
-    { id: 2, title: 'Встреча с командой', day: 'ВТ', completed: true },
-    { id: 3, title: 'Сдать отчёт', day: 'СР', completed: false },
-    { id: 4, title: 'Тренировка', day: 'ЧТ', completed: false },
-    { id: 5, title: 'Планирование недели', day: 'ПТ', completed: false },
+    { id: 1, title: 'Подготовить презентацию', day: 'ПН', completed: false, category: 'Работа' },
+    { id: 2, title: 'Встреча с командой', day: 'ВТ', completed: true, category: 'Работа' },
+    { id: 3, title: 'Сдать отчёт', day: 'СР', completed: false, category: 'Работа' },
+    { id: 4, title: 'Тренировка', day: 'ЧТ', completed: false, category: 'Здоровье' },
+    { id: 5, title: 'Планирование недели', day: 'ПТ', completed: false, category: 'Личное' },
+    { id: 6, title: 'Утренняя зарядка', day: 'ПН', completed: false, category: 'Здоровье' },
+    { id: 7, title: 'Прочитать 30 страниц', day: 'СР', completed: true, category: 'Обучение' },
   ]);
 
   const [trackers, setTrackers] = useState([
@@ -46,19 +43,24 @@ const Index = () => {
   const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
                       'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
-  const toggleTask = (id: number, isWeekTask: boolean) => {
-    if (isWeekTask) {
-      setWeekTasks(weekTasks.map(task => 
-        task.id === id ? { ...task, completed: !task.completed } : task
-      ));
-    } else {
-      setTodayTasks(todayTasks.map(task => 
-        task.id === id ? { ...task, completed: !task.completed } : task
-      ));
-    }
+  const toggleTask = (id: number) => {
+    setWeekTasks(weekTasks.map(task => 
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
   };
 
-  const completedToday = todayTasks.filter(t => t.completed).length;
+  const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+  const dayNames = {
+    'ПН': 'Понедельник',
+    'ВТ': 'Вторник',
+    'СР': 'Среда',
+    'ЧТ': 'Четверг',
+    'ПТ': 'Пятница',
+    'СБ': 'Суббота',
+    'ВС': 'Воскресенье'
+  };
+
+  const getTasksForDay = (day: string) => weekTasks.filter(task => task.day === day);
   const completedWeek = weekTasks.filter(t => t.completed).length;
 
   return (
@@ -71,12 +73,8 @@ const Index = () => {
           <p className="text-muted-foreground text-lg">Твой креативный планировщик дня</p>
         </header>
 
-        <Tabs defaultValue="today" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 h-14 bg-white/80 backdrop-blur-sm shadow-lg">
-            <TabsTrigger value="today" className="flex items-center gap-2">
-              <Icon name="Sun" size={18} />
-              <span className="hidden sm:inline">Сегодня</span>
-            </TabsTrigger>
+        <Tabs defaultValue="week" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 h-14 bg-white/80 backdrop-blur-sm shadow-lg">
             <TabsTrigger value="week" className="flex items-center gap-2">
               <Icon name="Calendar" size={18} />
               <span className="hidden sm:inline">Неделя</span>
@@ -95,84 +93,92 @@ const Index = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="today" className="space-y-4 animate-slide-up">
-            <Card className="border-2 shadow-xl bg-gradient-to-br from-white to-purple-50">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Icon name="CheckCircle2" className="text-primary" />
-                    Задачи на сегодня
-                  </span>
-                  <Badge variant="secondary" className="text-lg px-4 py-1">
-                    {completedToday}/{todayTasks.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {todayTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-3 p-4 rounded-2xl bg-white border-2 border-purple-100 hover:border-purple-300 transition-all hover:shadow-md group"
-                  >
-                    <Checkbox
-                      checked={task.completed}
-                      onCheckedChange={() => toggleTask(task.id, false)}
-                      className="h-6 w-6"
-                    />
-                    <div className="flex-1">
-                      <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                        {task.title}
-                      </p>
-                      <Badge variant="outline" className="mt-1">{task.category}</Badge>
-                    </div>
-                  </div>
-                ))}
-                <Button className="w-full mt-4 h-12 text-lg rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-                  <Icon name="Plus" className="mr-2" />
-                  Добавить задачу
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
+
 
           <TabsContent value="week" className="space-y-4 animate-slide-up">
-            <Card className="border-2 shadow-xl bg-gradient-to-br from-white to-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Icon name="CalendarRange" className="text-blue-600" />
-                    Планы на неделю
-                  </span>
-                  <Badge variant="secondary" className="text-lg px-4 py-1">
-                    {completedWeek}/{weekTasks.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {weekTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-3 p-4 rounded-2xl bg-white border-2 border-blue-100 hover:border-blue-300 transition-all hover:shadow-md"
-                  >
-                    <Badge className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-3 py-1">
-                      {task.day}
-                    </Badge>
-                    <Checkbox
-                      checked={task.completed}
-                      onCheckedChange={() => toggleTask(task.id, true)}
-                      className="h-6 w-6"
-                    />
-                    <p className={`flex-1 font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
-                      {task.title}
-                    </p>
-                  </div>
-                ))}
-                <Button className="w-full mt-4 h-12 text-lg rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
-                  <Icon name="Plus" className="mr-2" />
-                  Добавить задачу
-                </Button>
-              </CardContent>
-            </Card>
+            {selectedDay ? (
+              <Card className="border-2 shadow-xl bg-gradient-to-br from-white to-blue-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setSelectedDay(null)}
+                      className="flex items-center gap-2"
+                    >
+                      <Icon name="ArrowLeft" size={20} />
+                      Назад к неделе
+                    </Button>
+                    <span className="text-2xl font-display">{dayNames[selectedDay]}</span>
+                    <div className="w-24" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {getTasksForDay(selectedDay).map((task) => (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 p-4 rounded-2xl bg-white border-2 border-blue-100 hover:border-blue-300 transition-all hover:shadow-md"
+                    >
+                      <Checkbox
+                        checked={task.completed}
+                        onCheckedChange={() => toggleTask(task.id)}
+                        className="h-6 w-6"
+                      />
+                      <div className="flex-1">
+                        <p className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                          {task.title}
+                        </p>
+                        <Badge variant="outline" className="mt-1">{task.category}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {getTasksForDay(selectedDay).length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Icon name="CalendarOff" size={48} className="mx-auto mb-2 opacity-50" />
+                      <p>Нет задач на этот день</p>
+                    </div>
+                  )}
+                  <Button className="w-full mt-4 h-12 text-lg rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
+                    <Icon name="Plus" className="mr-2" />
+                    Добавить задачу
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {daysOfWeek.map((day) => {
+                  const dayTasks = getTasksForDay(day);
+                  const completedTasks = dayTasks.filter(t => t.completed).length;
+                  return (
+                    <Card
+                      key={day}
+                      className="border-2 shadow-xl hover:shadow-2xl transition-all cursor-pointer hover:scale-105 bg-gradient-to-br from-white to-blue-50"
+                      onClick={() => setSelectedDay(day)}
+                    >
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-center">
+                          <div className="text-sm text-muted-foreground mb-1">{day}</div>
+                          <div className="text-lg font-display">{dayNames[day].slice(0, 3)}</div>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center justify-center gap-2">
+                          <Badge variant="secondary" className="text-base px-3">
+                            {dayTasks.length}
+                          </Badge>
+                          <Icon name="ListTodo" size={18} className="text-blue-600" />
+                        </div>
+                        {dayTasks.length > 0 && (
+                          <Progress
+                            value={(completedTasks / dayTasks.length) * 100}
+                            className="h-2"
+                          />
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="trackers" className="animate-slide-up">
@@ -273,7 +279,7 @@ const Index = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-5xl font-bold">{completedToday + completedWeek}</p>
+                  <p className="text-5xl font-bold">{completedWeek}</p>
                   <p className="text-purple-100 mt-2">за всё время</p>
                 </CardContent>
               </Card>
