@@ -60,6 +60,29 @@ const Index = () => {
     'ВС': 'Воскресенье'
   };
 
+  const getWeekDates = () => {
+    const today = new Date();
+    const currentDay = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+    
+    const dates: { [key: string]: Date } = {};
+    daysOfWeek.forEach((day, index) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + index);
+      dates[day] = date;
+    });
+    return dates;
+  };
+
+  const weekDates = getWeekDates();
+
+  const formatDate = (date: Date) => {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    return `${day}.${month < 10 ? '0' + month : month}`;
+  };
+
   const getTasksForDay = (day: string) => weekTasks.filter(task => task.day === day);
   const completedWeek = weekTasks.filter(t => t.completed).length;
 
@@ -156,8 +179,8 @@ const Index = () => {
                     >
                       <CardHeader className="pb-3">
                         <CardTitle className="text-center">
-                          <div className="text-sm text-muted-foreground mb-1">{day}</div>
-                          <div className="text-lg font-display">{dayNames[day].slice(0, 3)}</div>
+                          <div className="text-xs text-muted-foreground mb-1">{formatDate(weekDates[day])}</div>
+                          <div className="text-base font-display">{dayNames[day]}</div>
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-2">
