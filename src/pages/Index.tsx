@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [weekOffset, setWeekOffset] = useState(0);
   
   const [weekTasks, setWeekTasks] = useState([
     { id: 1, title: 'Подготовить презентацию', day: 'ПН', completed: false, category: 'Работа' },
@@ -64,7 +65,7 @@ const Index = () => {
     const today = new Date();
     const currentDay = today.getDay();
     const monday = new Date(today);
-    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1));
+    monday.setDate(today.getDate() - (currentDay === 0 ? 6 : currentDay - 1) + (weekOffset * 7));
     
     const dates: { [key: string]: Date } = {};
     daysOfWeek.forEach((day, index) => {
@@ -76,6 +77,16 @@ const Index = () => {
   };
 
   const weekDates = getWeekDates();
+
+  const getWeekRange = () => {
+    const firstDay = weekDates['ПН'];
+    const lastDay = weekDates['ВС'];
+    return `${formatDate(firstDay)} - ${formatDate(lastDay)}`;
+  };
+
+  const goToPreviousWeek = () => setWeekOffset(weekOffset - 1);
+  const goToNextWeek = () => setWeekOffset(weekOffset + 1);
+  const goToCurrentWeek = () => setWeekOffset(0);
 
   const formatDate = (date: Date) => {
     const day = date.getDate();
@@ -119,6 +130,43 @@ const Index = () => {
 
 
           <TabsContent value="week" className="space-y-4 animate-slide-up">
+            {!selectedDay && (
+              <Card className="border-2 shadow-xl bg-white/80 backdrop-blur-sm">
+                <CardContent className="py-4">
+                  <div className="flex items-center justify-between">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={goToPreviousWeek}
+                      className="rounded-xl"
+                    >
+                      <Icon name="ChevronLeft" />
+                    </Button>
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg font-display">{getWeekRange()}</span>
+                      {weekOffset !== 0 && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={goToCurrentWeek}
+                          className="rounded-xl"
+                        >
+                          Текущая неделя
+                        </Button>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={goToNextWeek}
+                      className="rounded-xl"
+                    >
+                      <Icon name="ChevronRight" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {selectedDay ? (
               <Card className="border-2 shadow-xl bg-gradient-to-br from-white to-blue-50">
                 <CardHeader>
